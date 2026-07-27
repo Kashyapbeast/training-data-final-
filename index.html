@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMC L&D · Learning Analytics Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,900;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0a0f18;
+    --bg-alt:#0d1420;
+    --surface:#111b2b;
+    --surface-alt:#16233a;
+    --card:#12203350;
+    --border:#22334a;
+    --border-soft:#1a2739;
+    --gold:#cda649;
+    --gold-soft:#e6c877;
+    --emerald:#39bf8f;
+    --coral:#e2604f;
+    --text:#eef1f5;
+    --text-dim:#9aa7ba;
+    --text-faint:#5f6d82;
+    --serif:'Fraunces', serif;
+    --mono:'IBM Plex Mono', monospace;
+    --sans:'Inter', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(1100px 600px at 85% -10%, #16233a 0%, transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, #101c2c 0%, transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit; text-decoration:none;}
+  img{max-width:100%;}
+
+  ::selection{background:var(--gold); color:#0a0f18;}
+
+  /* ---------- scrollbar ---------- */
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-track{background:var(--bg);}
+  ::-webkit-scrollbar-thumb{background:var(--border); border-radius:6px;}
+
+  /* ---------- top bar ---------- */
+  header.topbar{
+    position:sticky; top:0; z-index:50;
+    background:rgba(10,15,24,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border-soft);
+  }
+  .topbar-inner{
+    max-width:1240px; margin:0 auto; padding:16px 28px;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:24px;
+  }
+  .brand{display:flex; align-items:baseline; gap:10px;}
+  .brand-mark{
+    font-family:var(--serif); font-weight:900; font-size:1.35rem; letter-spacing:0.01em;
+    color:var(--gold-soft);
+  }
+  .brand-sub{
+    font-family:var(--mono); font-size:0.68rem; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--text-faint);
+  }
+  nav.toplinks{display:flex; gap:26px; font-size:0.82rem;}
+  nav.toplinks a{
+    color:var(--text-dim); font-weight:500; letter-spacing:0.02em;
+    padding-bottom:3px; border-bottom:1px solid transparent;
+    transition:color .15s, border-color .15s;
+  }
+  nav.toplinks a:hover{color:var(--gold-soft); border-color:var(--gold);}
+
+  /* ---------- ticker ---------- */
+  .ticker-wrap{
+    background:#0d1522;
+    border-bottom:1px solid var(--border-soft);
+    overflow:hidden;
+    white-space:nowrap;
+    position:relative;
+  }
+  .ticker-wrap::before,.ticker-wrap::after{
+    content:""; position:absolute; top:0; bottom:0; width:60px; z-index:2; pointer-events:none;
+  }
+  .ticker-wrap::before{left:0; background:linear-gradient(90deg,#0d1522,transparent);}
+  .ticker-wrap::after{right:0; background:linear-gradient(-90deg,#0d1522,transparent);}
+  .ticker-track{
+    display:inline-flex; gap:48px; padding:9px 0;
+    animation:ticker 34s linear infinite;
+    font-family:var(--mono); font-size:0.76rem;
+  }
+  .ticker-wrap:hover .ticker-track{animation-play-state:paused;}
+  @keyframes ticker{from{transform:translateX(0);} to{transform:translateX(-50%);}}
+  .tick{display:inline-flex; align-items:center; gap:7px; color:var(--text-dim);}
+  .tick b{color:var(--text); font-weight:600;}
+  .tick .up{color:var(--emerald);}
+  .tick .down{color:var(--coral);}
+
+  /* ---------- hero ---------- */
+  .hero{
+    max-width:1240px; margin:0 auto; padding:76px 28px 40px;
+  }
+  .eyebrow{
+    font-family:var(--mono); font-size:0.72rem; letter-spacing:0.18em; text-transform:uppercase;
+    color:var(--gold); margin-bottom:18px; display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{content:""; width:26px; height:1px; background:var(--gold);}
+  h1.hero-title{
+    font-family:var(--serif); font-weight:600; font-size:clamp(2.3rem, 4.4vw, 3.6rem);
+    line-height:1.08; max-width:16ch; letter-spacing:-0.01em;
+  }
+  h1.hero-title em{
+    font-style:italic; font-weight:500; color:var(--gold-soft);
+  }
+  .hero-desc{
+    margin-top:22px; max-width:56ch; color:var(--text-dim); font-size:1.02rem;
+  }
+  .hero-desc b{color:var(--text); font-weight:600;}
+
+  .kpi-grid{
+    margin-top:48px;
+    display:grid; grid-template-columns:repeat(4, 1fr); gap:1px;
+    background:var(--border-soft);
+    border:1px solid var(--border-soft);
+    border-radius:14px; overflow:hidden;
+  }
+  .kpi{
+    background:var(--surface); padding:24px 22px; position:relative;
+  }
+  .kpi-label{
+    font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-faint);
+    font-weight:600;
+  }
+  .kpi-value{
+    font-family:var(--mono); font-size:2.05rem; font-weight:600; margin-top:10px; color:var(--text);
+    letter-spacing:-0.01em;
+  }
+  .kpi-value small{font-size:1rem; color:var(--text-dim); font-weight:500;}
+  .kpi-note{margin-top:6px; font-size:0.78rem; color:var(--text-dim);}
+  .kpi-note.pos{color:var(--emerald);}
+  .kpi-note.neg{color:var(--coral);}
+
+  /* ---------- sections ---------- */
+  .wrap{max-width:1240px; margin:0 auto; padding:0 28px;}
+  section.block{padding:64px 0 12px; border-top:1px solid var(--border-soft);}
+  .block-head{
+    display:flex; justify-content:space-between; align-items:flex-end; gap:24px; margin-bottom:28px; flex-wrap:wrap;
+  }
+  .block-num{font-family:var(--mono); color:var(--text-faint); font-size:0.78rem; letter-spacing:0.1em;}
+  h2.block-title{
+    font-family:var(--serif); font-weight:600; font-size:1.85rem; margin-top:6px; letter-spacing:-0.01em;
+  }
+  .block-sub{color:var(--text-dim); font-size:0.92rem; margin-top:8px; max-width:60ch;}
+
+  /* ---------- clickable chart card ---------- */
+  .chart-card{
+    background:var(--surface); border:1px solid var(--border-soft); border-radius:16px;
+    padding:26px 26px 18px; position:relative; overflow:hidden;
+    transition:transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    cursor:pointer;
+    display:block;
+  }
+  .chart-card:hover{
+    transform:translateY(-4px);
+    border-color:var(--gold);
+    box-shadow:0 18px 40px -18px rgba(0,0,0,0.6);
+  }
+  .chart-card:focus-visible{outline:2px solid var(--gold); outline-offset:3px;}
+  .chart-card .cc-head{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:14px; margin-bottom:16px;
+  }
+  .cc-title{font-weight:600; font-size:1.02rem;}
+  .cc-tag{font-size:0.72rem; color:var(--text-faint); font-family:var(--mono); margin-top:3px;}
+  .cc-link{
+    display:flex; align-items:center; gap:6px;
+    font-family:var(--mono); font-size:0.7rem; color:var(--text-faint);
+    border:1px solid var(--border); border-radius:20px; padding:5px 10px 5px 12px;
+    white-space:nowrap; transition:color .18s, border-color .18s, background .18s;
+  }
+  .chart-card:hover .cc-link{color:#0a0f18; background:var(--gold-soft); border-color:var(--gold-soft);}
+  .chart-canvas-wrap{position:relative; height:300px;}
+  .chart-canvas-wrap.short{height:230px;}
+
+  .grid-2{display:grid; grid-template-columns:1.3fr 1fr; gap:22px;}
+  .grid-2.wide-first{grid-template-columns:1.6fr 1fr;}
+  @media(max-width:880px){.grid-2{grid-template-columns:1fr;}}
+
+  /* ---------- table ---------- */
+  .table-card{
+    background:var(--surface); border:1px solid var(--border-soft); border-radius:16px;
+    padding:22px 22px 8px; margin-top:22px;
+  }
+  .table-tools{
+    display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:14px; flex-wrap:wrap;
+  }
+  .search-box{
+    background:var(--bg-alt); border:1px solid var(--border); border-radius:9px;
+    padding:9px 13px; color:var(--text); font-family:var(--sans); font-size:0.86rem; width:260px;
+  }
+  .search-box:focus{outline:none; border-color:var(--gold);}
+  .table-scroll{max-height:420px; overflow:auto; border-top:1px solid var(--border-soft);}
+  table{width:100%; border-collapse:collapse; font-size:0.85rem;}
+  thead th{
+    position:sticky; top:0; background:var(--surface); text-align:left; padding:11px 12px;
+    font-weight:600; color:var(--text-dim); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em;
+    border-bottom:1px solid var(--border-soft); cursor:pointer; user-select:none; white-space:nowrap;
+  }
+  thead th:hover{color:var(--gold-soft);}
+  thead th .arrow{opacity:0.4; margin-left:4px; font-size:0.7rem;}
+  tbody td{padding:10px 12px; border-bottom:1px solid var(--border-soft); color:var(--text-dim); font-family:var(--mono); font-size:0.82rem;}
+  tbody td:first-child{color:var(--text); font-family:var(--sans); font-weight:500;}
+  tbody tr:hover{background:var(--bg-alt);}
+  .num-pos{color:var(--emerald);}
+
+  /* ---------- feedback trainer cards ---------- */
+  .trainer-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px;}
+  @media(max-width:980px){.trainer-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:560px){.trainer-grid{grid-template-columns:1fr;}}
+  .trainer-card{
+    background:var(--surface); border:1px solid var(--border-soft); border-radius:14px; padding:20px;
+  }
+  .trainer-name{font-weight:600; font-size:0.95rem;}
+  .trainer-role{font-size:0.72rem; color:var(--text-faint); font-family:var(--mono); margin-top:2px;}
+  .trainer-score{
+    font-family:var(--mono); font-size:2.1rem; font-weight:600; margin:14px 0 4px; color:var(--gold-soft);
+  }
+  .trainer-score small{font-size:0.9rem; color:var(--text-faint); font-weight:400;}
+  .trainer-bar-row{display:flex; align-items:center; gap:8px; font-size:0.72rem; color:var(--text-dim); margin-top:8px;}
+  .trainer-bar-track{flex:1; height:5px; background:var(--border-soft); border-radius:3px; overflow:hidden;}
+  .trainer-bar-fill{height:100%; background:linear-gradient(90deg,var(--gold),var(--gold-soft)); border-radius:3px;}
+  .trainer-responses{margin-top:14px; font-size:0.76rem; color:var(--text-faint); border-top:1px dashed var(--border); padding-top:12px;}
+
+  /* ---------- footer ---------- */
+  footer{
+    margin-top:80px; border-top:1px solid var(--border-soft); padding:40px 28px 46px;
+  }
+  .footer-inner{
+    max-width:1240px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap;
+  }
+  .footer-inner p{color:var(--text-faint); font-size:0.8rem; max-width:60ch;}
+  .footer-inner .brand-mark{font-size:1.05rem;}
+
+  @media(max-width:760px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    nav.toplinks{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">SMC&nbsp;L&amp;D</span>
+      <span class="brand-sub">Learning Analytics Desk</span>
+    </div>
+    <nav class="toplinks">
+      <a href="#footfall">Footfall</a>
+      <a href="#region">Regional</a>
+      <a href="#department">Department</a>
+      <a href="#evaluation">Pre / Post</a>
+      <a href="#feedback">Trainer Feedback</a>
+    </nav>
+  </div>
+  <div class="ticker-wrap">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="eyebrow">Apr – Jun 2026 · Quarterly Read-Out</div>
+    <h1 class="hero-title">Every session, <em>tracked</em>. Every trainer, <em>scored</em>.</h1>
+    <p class="hero-desc">
+      A live desk for SMC's Learning &amp; Development programme — footfall, regional
+      and department participation, pre/post evaluation lift, and trainer feedback,
+      pulled together in one view. <b>Click any chart to jump to its live Google Sheet.</b>
+    </p>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Unique Learners</div>
+        <div class="kpi-value">1,528</div>
+        <div class="kpi-note pos">▲ 108% vs April</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg. Trainer Rating</div>
+        <div class="kpi-value">4.86 <small>/ 5</small></div>
+        <div class="kpi-note">across 519 responses</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Courses Completed</div>
+        <div class="kpi-value">4,266</div>
+        <div class="kpi-note">across 44 active depts</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Trainers Lifted Scores</div>
+        <div class="kpi-value">3 <small>/ 4</small></div>
+        <div class="kpi-note">pre → post evaluation</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTFALL ================= -->
+  <section class="block" id="footfall">
+    <div class="block-head">
+      <div>
+        <div class="block-num">01 — Engagement</div>
+        <h2 class="block-title">Learning Footfall</h2>
+        <p class="block-sub">Unique users engaging with the L&amp;D platform each month, Q1 FY26–27.</p>
+      </div>
+    </div>
+    <a class="chart-card" id="card-footfall" target="_blank" rel="noopener">
+      <div class="cc-head">
+        <div>
+          <div class="cc-title">Monthly Unique Users — April to June 2026</div>
+          <div class="cc-tag">Footfall.xlsx · Sheet1</div>
+        </div>
+        <span class="cc-link">Open sheet ↗</span>
+      </div>
+      <div class="chart-canvas-wrap"><canvas id="footfallChart"></canvas></div>
+    </a>
+  </section>
+
+  <!-- ================= REGION ================= -->
+  <section class="block" id="region">
+    <div class="block-head">
+      <div>
+        <div class="block-num">02 — Reach</div>
+        <h2 class="block-title">Regional Performance</h2>
+        <p class="block-sub">Course and event completion by HR region — Head Office, HO IT, Kolkata and Mumbai.</p>
+      </div>
+    </div>
+    <a class="chart-card" id="card-region" target="_blank" rel="noopener">
+      <div class="cc-head">
+        <div>
+          <div class="cc-title">Total Courses vs Events Completed, by Region</div>
+          <div class="cc-tag">Region_Wise.csv</div>
+        </div>
+        <span class="cc-link">Open sheet ↗</span>
+      </div>
+      <div class="chart-canvas-wrap"><canvas id="regionChart"></canvas></div>
+    </a>
+  </section>
+
+  <!-- ================= DEPARTMENT ================= -->
+  <section class="block" id="department">
+    <div class="block-head">
+      <div>
+        <div class="block-num">03 — Depth</div>
+        <h2 class="block-title">Department Performance</h2>
+        <p class="block-sub">52 departments tracked · 44 with recorded activity. Top 12 by combined course + event completions shown below; full breakdown in the table.</p>
+      </div>
+    </div>
+    <a class="chart-card" id="card-department" target="_blank" rel="noopener">
+      <div class="cc-head">
+        <div>
+          <div class="cc-title">Top 12 Departments by Total Completions</div>
+          <div class="cc-tag">Department_Wise.csv</div>
+        </div>
+        <span class="cc-link">Open sheet ↗</span>
+      </div>
+      <div class="chart-canvas-wrap"><canvas id="deptChart"></canvas></div>
+    </a>
+
+    <div class="table-card">
+      <div class="table-tools">
+        <div class="cc-title" style="font-size:0.92rem;">Full Department Breakdown</div>
+        <input class="search-box" id="deptSearch" placeholder="Search department…" type="text">
+      </div>
+      <div class="table-scroll">
+        <table id="deptTable">
+          <thead>
+            <tr>
+              <th data-key="dept">Department <span class="arrow">↕</span></th>
+              <th data-key="uc">User Courses <span class="arrow">↕</span></th>
+              <th data-key="tc">Total Courses <span class="arrow">↕</span></th>
+              <th data-key="ue">User Events <span class="arrow">↕</span></th>
+              <th data-key="te">Total Events <span class="arrow">↕</span></th>
+            </tr>
+          </thead>
+          <tbody id="deptTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PRE/POST ================= -->
+  <section class="block" id="evaluation">
+    <div class="block-head">
+      <div>
+        <div class="block-num">04 — Impact</div>
+        <h2 class="block-title">Pre vs Post Training Evaluation</h2>
+        <p class="block-sub">Average scores out of 10, before and after each trainer's session.</p>
+      </div>
+    </div>
+    <a class="chart-card" id="card-prepost" target="_blank" rel="noopener">
+      <div class="cc-head">
+        <div>
+          <div class="cc-title">Pre vs Post Evaluation Average, by Trainer</div>
+          <div class="cc-tag">Pre___Post_data.xlsx · Sheet1</div>
+        </div>
+        <span class="cc-link">Open sheet ↗</span>
+      </div>
+      <div class="chart-canvas-wrap"><canvas id="prepostChart"></canvas></div>
+    </a>
+  </section>
+
+  <!-- ================= FEEDBACK ================= -->
+  <section class="block" id="feedback">
+    <div class="block-head">
+      <div>
+        <div class="block-num">05 — Sentiment</div>
+        <h2 class="block-title">Trainer Feedback Ratings</h2>
+        <p class="block-sub">Averaged across approachability, culture fit, subject knowledge and overall session rating (out of 5).</p>
+      </div>
+    </div>
+
+    <div class="grid-2 wide-first" style="margin-bottom:22px;">
+      <a class="chart-card" id="card-feedback" target="_blank" rel="noopener">
+        <div class="cc-head">
+          <div>
+            <div class="cc-title">Rating Breakdown by Trainer</div>
+            <div class="cc-tag">Feedback_to_be_calculated.xlsx · Final feedback</div>
+          </div>
+          <span class="cc-link">Open sheet ↗</span>
+        </div>
+        <div class="chart-canvas-wrap"><canvas id="feedbackChart"></canvas></div>
+      </a>
+      <a class="chart-card" id="card-responses" target="_blank" rel="noopener">
+        <div class="cc-head">
+          <div>
+            <div class="cc-title">Response Volume by Trainer</div>
+            <div class="cc-tag">519 total responses</div>
+          </div>
+          <span class="cc-link">Open sheet ↗</span>
+        </div>
+        <div class="chart-canvas-wrap short"><canvas id="responsesChart"></canvas></div>
+      </a>
+    </div>
+
+    <div class="trainer-grid" id="trainerGrid"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <span class="brand-mark">SMC&nbsp;L&amp;D</span>
+      <p style="margin-top:10px;">Learning Analytics Desk · built from live SMC training data · click any chart to open its source Google Sheet.</p>
+    </div>
+    <p>Q1 FY26–27 read-out · generated for internal L&amp;D reporting.</p>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   SOURCE SHEET LINKS
+   Replace each placeholder below with the real, shareable
+   Google Sheets URL for that dataset, then re-publish the page.
+   ============================================================ */
+const SHEET_LINKS = {
+  footfall:   "https://docs.google.com/spreadsheets/d/1ieZrPvmR-CGErXDr5ohbOsNVC18pWmnf/edit?usp=sharing&ouid=102377981792922753483&rtpof=true&sd=true",
+  region:     "https://docs.google.com/spreadsheets/d/1cz6AG4VSaslnvS8ORYVvIfybMbYZvkHSkK7uGMIKR6o/edit?usp=sharing",
+  department: "https://docs.google.com/spreadsheets/d/1cTC_lrOienHfo_NFtD9I5EgEdO5wexlscLT3ksvaX00/edit?usp=sharing",
+  prepost:    "https://docs.google.com/spreadsheets/d/1gtNPkj9-noSf8_NZqlkrUXh8w0U_grDf/edit?usp=sharing&ouid=102377981792922753483&rtpof=true&sd=true",
+  feedback:   "https://docs.google.com/spreadsheets/d/1XprHXom0j0pFQ60boscoKiUmdDZhoBXU/edit?usp=sharing&ouid=102377981792922753483&rtpof=true&sd=true",
+  responses:  "https://docs.google.com/spreadsheets/d/1XprHXom0j0pFQ60boscoKiUmdDZhoBXU/edit?usp=sharing&ouid=102377981792922753483&rtpof=true&sd=true"
+};
+Object.entries(SHEET_LINKS).forEach(([key, url]) => {
+  const el = document.getElementById('card-' + key);
+  if (el) el.setAttribute('href', url);
+});
+
+/* ============================================================ DATA */
+const FOOTFALL = [
+  {month:"Apr 2026", users:598},
+  {month:"May 2026", users:800},
+  {month:"Jun 2026", users:1244}
+];
+const FOOTFALL_COMBINED = 1528;
+
+const REGION = [
+  {region:"Head Office HR", uc:641, tc:2783, ue:785, te:4841},
+  {region:"HO IT HR",       uc:27,  tc:73,   ue:24,  te:31},
+  {region:"Kolkata HR",     uc:159, tc:572,  ue:282, te:3632},
+  {region:"Mumbai HR",      uc:204, tc:823,  ue:238, te:11574}
+];
+
+const DEPARTMENT = [
+["Account Opening",59,197,21,36],["Administration",10,34,6,12],["Back Office",2,9,3,3],
+["Back Office - Branch Operations",8,12,8,8],["Banking & Finance",0,0,4,8],
+["Banking Relations and Trading Tools",0,0,0,0],["Bullion",0,0,0,0],
+["Business Development - Channel Sales",8,36,8,215],["Business Development - Commodity",1,9,1,2],
+["Business Development - Online",65,413,87,5291],["Business Development - Retail",428,2127,680,10977],
+["Business Development - Sales",35,89,41,2473],["Business Development - Sub Broker",48,169,63,248],
+["Client Reactivation",64,197,67,332],["Corporate Affairs and Legal",3,11,2,2],
+["Corporate Client Group",12,61,7,7],["Corporate Communication & Branding",6,20,5,5],
+["Corporate Hedging Desk",0,0,0,0],["Corporate Taxation",0,0,1,1],["Customer Care",25,94,37,60],
+["Delivery Settlement",4,7,8,17],["Depository Participant",34,130,25,39],["Digital Marketing",6,19,4,25],
+["Directors' Secretariat",1,1,0,0],["Distribution",54,171,72,113],["Exchange Compliance",12,51,9,14],
+["Financial Accounting & Taxation",13,40,34,52],["Financial Product Distribution",1,4,1,4],
+["HR & L&D",19,67,26,54],["Human Resources",1,2,2,2],["Information Security",2,4,3,3],
+["Information Technology",0,0,0,0],["Institutional Equities",5,15,2,3],["Investment Banking",10,18,0,0],
+["IT & Networking",15,27,4,7],["IT & Software Development",0,0,0,0],["IT & Systems",7,29,1,6],
+["IT Engineering & Technology",12,39,10,12],["Mutual Fund Operations & Distribution",0,0,0,0],
+["NRI",3,7,0,0],["Operations",5,13,6,12],["Product Development",2,8,4,6],
+["Product Development - Broking",0,0,0,0],["Quality Assurance",11,21,17,29],["Research",4,8,3,5],
+["Risk Management & Operations",50,92,58,121],["Risk Management Operations (Commodity)",2,11,4,7],
+["Trade Settlement",0,0,2,2],["Trading Member Desk",0,0,3,4],["Trading Operations",1,1,4,6],
+["Travel Desk",1,3,1,1],["Treasury & Debt Solution Desk",0,0,0,0]
+].map(([dept,uc,tc,ue,te]) => ({dept,uc,tc,ue,te,total:tc+te}));
+
+const PREPOST = [
+  {trainer:"Saif",  pre:7.45, post:8.51, delta:1.06},
+  {trainer:"Arsh",  pre:8.22, post:9.12, delta:0.90},
+  {trainer:"Vipin", pre:7.56, post:6.12, delta:-1.44},
+  {trainer:"Jyoti", pre:8.76, post:9.09, delta:0.33}
+];
+
+const FEEDBACK = [
+  {trainer:"Vipin Kumar",       approachable:4.82, culture:4.76, knowledge:4.91, overall:4.88, avg:4.84, responses:152},
+  {trainer:"Mohd. Saif Ansari", approachable:4.91, culture:4.89, knowledge:4.94, overall:4.92, avg:4.92, responses:187},
+  {trainer:"Jyoti Verma",       approachable:4.75, culture:4.81, knowledge:4.79, overall:4.83, avg:4.80, responses:96},
+  {trainer:"Arsh Elahi",        approachable:4.88, culture:4.85, knowledge:4.90, overall:4.87, avg:4.88, responses:84}
+];
+
+/* ============================================================ CHART THEME */
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = "#9aa7ba";
+const GOLD = "#cda649", GOLD_SOFT="#e6c877", EMERALD="#39bf8f", CORAL="#e2604f", BLUE="#5b8def";
+const GRID = "rgba(255,255,255,0.06)";
+function baseGrid(extra={}){ return Object.assign({color:GRID, drawTicks:false}, extra); }
+
+/* ---------- Ticker ---------- */
+const tickerItems = [
+  {label:"UNIQUE LEARNERS", value:"1,528", dir:"up"},
+  {label:"JUN FOOTFALL", value:"1,244", dir:"up"},
+  {label:"AVG TRAINER RATING", value:"4.86 / 5", dir:"up"},
+  {label:"COURSES COMPLETED", value:"4,266", dir:"up"},
+  {label:"EVENTS COMPLETED", value:"20,224", dir:"up"},
+  {label:"SAIF · PRE→POST", value:"7.45 → 8.51", dir:"up"},
+  {label:"ARSH · PRE→POST", value:"8.22 → 9.12", dir:"up"},
+  {label:"VIPIN · PRE→POST", value:"7.56 → 6.12", dir:"down"},
+  {label:"JYOTI · PRE→POST", value:"8.76 → 9.09", dir:"up"},
+  {label:"TOP DEPT · BD RETAIL", value:"13,104 completions", dir:"up"},
+];
+const track = document.getElementById('tickerTrack');
+const renderTick = t => `<span class="tick"><span class="${t.dir}">${t.dir==='up'?'▲':'▼'}</span>${t.label} <b>${t.value}</b></span>`;
+track.innerHTML = tickerItems.map(renderTick).join('') + tickerItems.map(renderTick).join('');
+
+/* ---------- Footfall ---------- */
+new Chart(document.getElementById('footfallChart'), {
+  type:'bar',
+  data:{
+    labels: FOOTFALL.map(f=>f.month),
+    datasets:[
+      {type:'bar', label:'Unique Users', data:FOOTFALL.map(f=>f.users),
+        backgroundColor:'rgba(205,166,73,0.28)', borderColor:GOLD, borderWidth:1.5, borderRadius:6, maxBarThickness:70},
+      {type:'line', label:'Trend', data:FOOTFALL.map(f=>f.users),
+        borderColor:GOLD_SOFT, borderWidth:2, tension:0.35, pointBackgroundColor:GOLD_SOFT, pointRadius:4, fill:false}
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    interaction:{intersect:false, mode:'index'},
+    plugins:{legend:{display:false}, tooltip:{backgroundColor:'#0d1522', borderColor:'#22334a', borderWidth:1, padding:10}},
+    scales:{
+      x:{grid:{display:false}, ticks:{font:{family:"'IBM Plex Mono', monospace", size:11}}},
+      y:{grid:baseGrid(), ticks:{font:{family:"'IBM Plex Mono', monospace", size:11}}, beginAtZero:true}
+    }
+  }
+});
+
+/* ---------- Region ---------- */
+new Chart(document.getElementById('regionChart'), {
+  type:'bar',
+  data:{
+    labels: REGION.map(r=>r.region),
+    datasets:[
+      {label:'Total Courses Completed', data:REGION.map(r=>r.tc), backgroundColor:GOLD, borderRadius:5, maxBarThickness:34},
+      {label:'Total Events Completed', data:REGION.map(r=>r.te), backgroundColor:BLUE, borderRadius:5, maxBarThickness:34}
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'top', align:'end', labels:{boxWidth:10, boxHeight:10, font:{size:11}}},
+      tooltip:{backgroundColor:'#0d1522', borderColor:'#22334a', borderWidth:1, padding:10}},
+    scales:{
+      x:{grid:{display:false}, ticks:{font:{size:11}}},
+      y:{grid:baseGrid(), type:'logarithmic', ticks:{font:{family:"'IBM Plex Mono', monospace", size:10}}}
+    }
+  }
+});
+
+/* ---------- Department (top 12) ---------- */
+const deptTop = [...DEPARTMENT].sort((a,b)=>b.total-a.total).slice(0,12);
+new Chart(document.getElementById('deptChart'), {
+  type:'bar',
+  data:{
+    labels: deptTop.map(d=>d.dept),
+    datasets:[
+      {label:'Total Courses', data:deptTop.map(d=>d.tc), backgroundColor:GOLD, borderRadius:5, stack:'s'},
+      {label:'Total Events', data:deptTop.map(d=>d.te), backgroundColor:EMERALD, borderRadius:5, stack:'s'}
+    ]
+  },
+  options:{
+    indexAxis:'y',
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'top', align:'end', labels:{boxWidth:10, boxHeight:10, font:{size:11}}},
+      tooltip:{backgroundColor:'#0d1522', borderColor:'#22334a', borderWidth:1, padding:10}},
+    scales:{
+      x:{grid:baseGrid(), ticks:{font:{family:"'IBM Plex Mono', monospace", size:10}}},
+      y:{grid:{display:false}, ticks:{font:{size:10.5}}}
+    }
+  }
+});
+
+/* ---------- Department table ---------- */
+let deptSort = {key:'total', dir:-1};
+function renderDeptTable(){
+  const q = document.getElementById('deptSearch').value.toLowerCase();
+  let rows = DEPARTMENT.filter(d => d.dept.toLowerCase().includes(q));
+  rows.sort((a,b)=>{
+    const k = deptSort.key === 'dept' ? 'dept' : deptSort.key;
+    if (k === 'dept') return a.dept.localeCompare(b.dept) * deptSort.dir;
+    return (a[k]-b[k]) * deptSort.dir;
+  });
+  document.getElementById('deptTableBody').innerHTML = rows.map(d => `
+    <tr>
+      <td>${d.dept}</td>
+      <td>${d.uc}</td>
+      <td>${d.tc}</td>
+      <td>${d.ue}</td>
+      <td>${d.te}</td>
+    </tr>`).join('');
+}
+document.querySelectorAll('#deptTable thead th').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const key = th.dataset.key === 'dept' ? 'dept' : {uc:'uc',tc:'tc',ue:'ue',te:'te'}[th.dataset.key];
+    if (deptSort.key === key) deptSort.dir *= -1; else { deptSort.key = key; deptSort.dir = -1; }
+    renderDeptTable();
+  });
+});
+document.getElementById('deptSearch').addEventListener('input', renderDeptTable);
+renderDeptTable();
+
+/* ---------- Pre/Post ---------- */
+new Chart(document.getElementById('prepostChart'), {
+  type:'bar',
+  data:{
+    labels: PREPOST.map(p=>p.trainer),
+    datasets:[
+      {label:'Pre-Evaluation (/10)', data:PREPOST.map(p=>p.pre), backgroundColor:'rgba(154,167,186,0.35)', borderRadius:5, maxBarThickness:46},
+      {label:'Post-Evaluation (/10)', data:PREPOST.map(p=>p.post), backgroundColor: PREPOST.map(p=>p.delta>=0?EMERALD:CORAL), borderRadius:5, maxBarThickness:46}
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'top', align:'end', labels:{boxWidth:10, boxHeight:10, font:{size:11}}},
+      tooltip:{backgroundColor:'#0d1522', borderColor:'#22334a', borderWidth:1, padding:10,
+        callbacks:{afterBody:(items)=>{
+          const p = PREPOST[items[0].dataIndex];
+          return `Δ ${p.delta>0?'+':''}${p.delta.toFixed(2)}`;
+        }}}},
+    scales:{
+      x:{grid:{display:false}, ticks:{font:{size:12}}},
+      y:{grid:baseGrid(), max:10, ticks:{font:{family:"'IBM Plex Mono', monospace", size:11}}}
+    }
+  }
+});
+
+/* ---------- Feedback radar ---------- */
+new Chart(document.getElementById('feedbackChart'), {
+  type:'radar',
+  data:{
+    labels:['Approachability','Culture Fit','Subject Knowledge','Overall Session'],
+    datasets: FEEDBACK.map((f,i)=>({
+      label:f.trainer,
+      data:[f.approachable,f.culture,f.knowledge,f.overall],
+      borderColor:[GOLD,EMERALD,BLUE,'#c37bd6'][i],
+      backgroundColor:[GOLD,EMERALD,BLUE,'#c37bd6'][i]+'1a',
+      pointBackgroundColor:[GOLD,EMERALD,BLUE,'#c37bd6'][i],
+      borderWidth:2, pointRadius:3
+    }))
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom', labels:{boxWidth:10, boxHeight:10, font:{size:10.5}}},
+      tooltip:{backgroundColor:'#0d1522', borderColor:'#22334a', borderWidth:1, padding:10}},
+    scales:{
+      r:{
+        min:4.5, max:5,
+        grid:{color:GRID}, angleLines:{color:GRID},
+        pointLabels:{font:{size:10.5}, color:'#9aa7ba'},
+        ticks:{display:false, stepSize:0.1}
+      }
+    }
+  }
+});
+
+/* ---------- Responses ---------- */
+new Chart(document.getElementById('responsesChart'), {
+  type:'doughnut',
+  data:{
+    labels: FEEDBACK.map(f=>f.trainer),
+    datasets:[{
+      data: FEEDBACK.map(f=>f.responses),
+      backgroundColor:[GOLD,EMERALD,BLUE,'#c37bd6'],
+      borderColor:'#111b2b', borderWidth:3
+    }]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false, cutout:'62%',
+    plugins:{legend:{position:'bottom', labels:{boxWidth:10, boxHeight:10, font:{size:10.5}}},
+      tooltip:{backgroundColor:'#0d1522', borderColor:'#22334a', borderWidth:1, padding:10}}
+  }
+});
+
+/* ---------- Trainer cards ---------- */
+document.getElementById('trainerGrid').innerHTML = FEEDBACK
+  .slice().sort((a,b)=>b.avg-a.avg)
+  .map(f => `
+    <div class="trainer-card">
+      <div class="trainer-name">${f.trainer}</div>
+      <div class="trainer-role">${f.responses} responses</div>
+      <div class="trainer-score">${f.avg.toFixed(2)} <small>/ 5 avg</small></div>
+      <div class="trainer-bar-row"><span style="width:86px;">Approachable</span>
+        <div class="trainer-bar-track"><div class="trainer-bar-fill" style="width:${f.approachable/5*100}%"></div></div>
+        <span>${f.approachable}</span></div>
+      <div class="trainer-bar-row"><span style="width:86px;">Culture</span>
+        <div class="trainer-bar-track"><div class="trainer-bar-fill" style="width:${f.culture/5*100}%"></div></div>
+        <span>${f.culture}</span></div>
+      <div class="trainer-bar-row"><span style="width:86px;">Knowledge</span>
+        <div class="trainer-bar-track"><div class="trainer-bar-fill" style="width:${f.knowledge/5*100}%"></div></div>
+        <span>${f.knowledge}</span></div>
+      <div class="trainer-bar-row"><span style="width:86px;">Overall</span>
+        <div class="trainer-bar-track"><div class="trainer-bar-fill" style="width:${f.overall/5*100}%"></div></div>
+        <span>${f.overall}</span></div>
+    </div>`).join('');
+</script>
+</body>
+</html>
